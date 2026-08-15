@@ -1,7 +1,8 @@
 # Quick Filler - Extrator de Documentos Trabalhistas
 
 > ⚠️ **AVISO IMPORTANTE: AMBIENTE DE PRODUÇÃO VS. LOCAL** ⚠️
-> Este projeto está atualmente hospedado e publicado, portanto, o código fonte reflete a configuração do meu ambiente próprio na nuvem. 
+> Este projeto está atualmente hospedado e publicado, portanto, o código fonte reflete a configuração do meu ambiente próprio na nuvem. Se o projeto na url publica demorar o envio dos pdfs e der timeout
+> tente novamente pois o render(Onde Foi Hospedado) demora para reativar o servidor
 > 
 > **Para rodar localmente:** Será preciso alterar as URLs de integração. Verifique o seu `.env` (ou as variáveis de ambiente do sistema) e a URL base configurada no Angular para evitar erros de conexão (ex: apontar para a nuvem em vez do localhost).
 > 
