@@ -1,31 +1,50 @@
-version: '3.8'
 
 services:
+  redis:
+    image: redis:alpine
+    container_name: app-redis
+    ports:
+      - "6379:6379"
+    restart: always
+
   frontend:
-    build: ./frontend
+    build: ./Front
     container_name: app-frontend
     ports:
-      - "8080:80" # Acesse o front em localhost:8080
+      - "8080:80"
     restart: always
 
   backend-server:
-    build: ./backend
+    build: ./Back
     container_name: app-backend-server
     ports:
-      - "3000:3000" # Porta da API
+      - "3000:3000"
     environment:
       - NODE_ENV=production
       - PORT=3000
-    # Sobrescreve o comando do Dockerfile para rodar SÓ o server
+      - REDIS_URL=redis://redis:6379
     command: npm run start:server
     restart: always
+    depends_on:
+      - redis
+    # ADICIONE ISSO AQUI: Mapeia o volume compartilhado para a pasta de uploads do server
+    volumes:
+      - shared-uploads:/app/uploads
 
   backend-worker:
-    build: ./backend
+    build: ./Back
     container_name: app-backend-worker
-    # Não expõe porta, pois o worker trabalha em background (ex: lendo filas ou DB)
     environment:
       - NODE_ENV=production
-    # Sobrescreve o comando do Dockerfile para rodar SÓ o worker
+      - REDIS_URL=redis://redis:6379
     command: npm run start:worker
     restart: always
+    depends_on:
+      - redis
+    # ADICIONE ISSO AQUI: Mapeia o MESMO volume para o worker
+    volumes:
+      - shared-uploads:/app/uploads
+
+# ADICIONE ISSO NO FINAL DO ARQUIVO: Declara a criação do volume gerenciado pelo Docker
+volumes:
+  shared-uploads:
