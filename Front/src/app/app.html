@@ -1,0 +1,229 @@
+<div class="app-container">
+  
+  <div class="left-panel">
+    <h2 class="title">Quick Filler</h2>
+    <p class="subtitle">Extrator de Cartões de Ponto e Holerites <br> <br>
+      <b style="color: red;">(Não é permitido arquivos com mais de 10mb)</b>
+    </p>
+
+    <div class="form-group">
+      <label>Tipo de Documento:</label>
+      <select [(ngModel)]="tipoSelecionado" class="form-control">
+        <option value="cartao-ponto">Cartão de Ponto</option>
+        <option value="holerite">Holerite</option>
+      </select>
+    </div>
+
+    <div class="file-upload-area">
+      <input #fileInput type="file" (change)="onFileChange($event)" accept="application/pdf" style="display: none;">
+      <button type="button" (click)="fileInput.click()" class="btn-custom-upload">
+        📁 Escolher Arquivo PDF
+      </button>
+      <span class="file-name" *ngIf="arquivoSelecionado">
+        <p style="margin: 10px 0 0 0; color: #0056b3; font-weight: bold;">{{ arquivoSelecionado.name }}</p>
+      </span>
+    </div>
+
+    <button (click)="enviarDocumento()" class="btn-primary">
+      Processar Documento
+    </button>
+  </div>
+
+  <div class="right-panel">
+    <div *ngIf="!arquivoSelecionado" class="empty-pdf">
+      <p>Selecione um arquivo PDF para visualizar</p>
+    </div>
+
+    <div *ngIf="arquivoSelecionado" class="pdf-viewer">
+      <div class="canvas-container">
+        <!-- Canvas da Tela Principal -->
+        <canvas #pdfCanvasMain style="transition: all 0.3s;"></canvas>
+      </div>
+
+      <div class="pagination-controls">
+        <button (click)="paginaAnterior()" [disabled]="paginaAtual <= 1" class="btn-page">⬅️ Anterior</button>
+        <span class="page-info">Página {{ paginaAtual }} de {{ totalPaginas }}</span>
+        <button (click)="proximaPagina()" [disabled]="paginaAtual >= totalPaginas" class="btn-page">Próxima ➡️</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ========================================================= -->
+  <!--  JANELA MODAL (SOBREPOSIÇÃO TELA DIVIDIDA)            -->
+  <!-- ========================================================= -->
+  <div class="modal-overlay" *ngIf="statusRequisicao !== 'ocioso'">
+    <div class="modal-window">
+      
+      <!-- O X PARA FECHAR -->
+      <button class="btn-close-modal" (click)="fecharModal()">&times;</button>
+
+      <div class="modal-split-layout">
+        
+        <!-- LADO ESQUERDO DA MODAL: PROCESSAMENTO E TABELAS -->
+        <div class="modal-left-panel">
+          
+          <!-- TELA 2: PROCESSANDO -->
+          <div *ngIf="statusRequisicao === 'processando'" class="processing-container">
+            <div class="spinner"></div>
+            <h3>Processando...</h3>
+            <p style="font-weight: bold; color: #555;">{{ mensagemProgresso }}</p>
+            <div class="progress-bar-container">
+              <div class="progress-bar-fill" [style.width.%]="valorPorcentagem"></div>
+            </div>
+            <span class="progress-text">{{ valorPorcentagem }}%</span>
+          </div>
+
+          <!-- TELA DE ERRO -->
+          <div *ngIf="statusRequisicao === 'erro'" class="error-container text-center">
+            <div class="error-content">
+              <h3 class="error-title" style="color: #dc3545; font-size: 24px;">❌ Falha na Extração</h3>
+              
+              <!-- Aqui nós mostramos o texto exato do erro que o servidor enviou -->
+              <p class="error-text" style="font-weight: bold; color: #555; margin: 20px 0;">
+                {{ mensagemErro }}
+              </p>
+              
+              <button (click)="fecharModal()" class="btn-primary" style="max-width: 200px; margin: 0 auto;">
+                Voltar ao Início
+              </button>
+            </div>
+          </div>
+
+          <!-- TELA 3: REVISÃO (TABELAS VERTICAIS) -->
+          <div *ngIf="statusRequisicao === 'revisao'" class="revisao-container">
+            <h3 class="success-title">✅ Extração Concluída</h3>
+            <p class="success-text">Revise as páginas abaixo. Clique numa célula para localizar o texto no PDF ao lado.</p>
+            
+            <div class="vertical-tables-scroll">
+              
+              <!-- LAYOUT HOLERITE -->
+              <ng-container *ngIf="tipoSelecionado === 'holerite'">
+                <div *ngFor="let page of dadosExtraidos?.pages" class="page-card">
+                  <h4 class="page-header">📄 Pág {{ page?.page }} — {{ page?.month }}/{{ page?.year }}</h4>
+                  <div class="page-body">
+                    <h5 class="section-title">Verbas</h5>
+                    <table class="data-table">
+                      <thead>
+                        <tr>
+                          <th>Cód</th>
+                          <th>Descrição</th>
+                          <th class="text-center">Ref</th>
+                          <th class="text-right">Valor</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let field of page?.fields">
+                          <td class="text-center" style="cursor: pointer;" (click)="destacarNoPdf(field.code)">{{ field.code }}</td>
+                          <td style="cursor: pointer;" (click)="destacarNoPdf(field.label)">{{ field.label }}</td>
+                          <td class="text-center">
+                            <!-- Ao focar (clicar ou dar TAB), busca o valor -->
+                            <input type="text" [(ngModel)]="field.reference" (focus)="destacarNoPdf(field.reference)" class="input-small">
+                          </td>
+                          <td class="text-right">
+                            <input type="text" [(ngModel)]="field.value" (focus)="destacarNoPdf(field.value)" class="input-medium">
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+
+                    <h5 class="section-title">Bases e Totais</h5>
+                    <table class="data-table">
+                      <tbody>
+                        <tr *ngFor="let base of page?.bases">
+                          <td class="font-bold" style="cursor: pointer;" (click)="destacarNoPdf(base.label)">{{ base.label }}</td>
+                          <td class="text-right">
+                            <input type="text" [(ngModel)]="base.value" (focus)="destacarNoPdf(base.value)" class="input-large">
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </ng-container>
+
+              <!-- LAYOUT CARTÃO DE PONTO -->
+              <ng-container *ngIf="tipoSelecionado === 'cartao-ponto'">
+                <div *ngFor="let page of dadosExtraidos?.pages" class="page-card">
+                  <h4 class="page-header">📄 Página {{ page?.page }}</h4>
+                  <div class="table-responsive">
+                    <table class="data-table ponto-table">
+                      <thead>
+                        <tr>
+                          <th class="text-left">Data</th>
+                          <th>Ent. 1</th>
+                          <th>Saí. 1</th>
+                          <th>Ent. 2</th>
+                          <th>Saí. 2</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let day of page?.days; let i = index" 
+                            [style.background-color]="obterCorFundo(page.days, day, i)"
+                            [style.border-left]="obterBordaEsquerda(page.days, i)"
+                            [attr.title]="obterTituloErro(page.days, day, i)">
+                          
+                          <td class="date-cell" style="cursor: pointer;" (click)="destacarNoPdf(day.date_raw)">
+                            {{ day?.date_raw }}
+                          </td>
+                          
+                          <!-- Inputs do Ponto -->
+                          <td>
+                            <input *ngIf="day?.punches[0]" type="text" [(ngModel)]="day.punches[0].time_hhmm" (focus)="destacarNoPdf(day.punches[0].time_hhmm)" class="input-time">
+                            <span *ngIf="!day?.punches[0]" class="empty-punch">-</span>
+                          </td>
+                          <td>
+                            <input *ngIf="day?.punches[1]" type="text" [(ngModel)]="day.punches[1].time_hhmm" (focus)="destacarNoPdf(day.punches[1].time_hhmm)" class="input-time">
+                            <span *ngIf="!day?.punches[1]" class="empty-punch">-</span>
+                          </td>
+                          <td>
+                            <input *ngIf="day?.punches[2]" type="text" [(ngModel)]="day.punches[2].time_hhmm" (focus)="destacarNoPdf(day.punches[2].time_hhmm)" class="input-time">
+                            <span *ngIf="!day?.punches[2]" class="empty-punch">-</span>
+                          </td>
+                          <td>
+                            <input *ngIf="day?.punches[3]" type="text" [(ngModel)]="day.punches[3].time_hhmm" (focus)="destacarNoPdf(day.punches[3].time_hhmm)" class="input-time">
+                            <span *ngIf="!day?.punches[3]" class="empty-punch">-</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </ng-container>
+
+            </div> <!-- Fim Vertical Scroll -->
+
+            <!-- EXPORTAÇÃO GRUDADA NO RODAPÉ DA ESQUERDA -->
+            <div class="export-section">
+              <div class="export-controls">
+                <select [(ngModel)]="formatoExportacao">
+                  <option value="xlsx">📊 Excel (.xlsx)</option>
+                  <option value="csv">📝 CSV (.csv)</option>
+                  <option value="json">💻 JSON (.json)</option>
+                </select>
+              </div>
+              <button (click)="baixarArquivo()" class="btn-success">✅ Baixar Exportação</button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- LADO DIREITO DA MODAL: VISUALIZADOR DE PDF -->
+        <div class="modal-right-panel">
+          <div class="canvas-container">
+            <!-- Canvas Secundário Exclusivo da Modal -->
+            <canvas #pdfCanvasModal style="transition: all 0.3s;"></canvas>
+          </div>
+
+          <div class="pagination-controls">
+            <button (click)="paginaAnterior()" [disabled]="paginaAtual <= 1" class="btn-page">⬅️ Ant</button>
+            <span class="page-info">Página {{ paginaAtual }} de {{ totalPaginas }}</span>
+            <button (click)="proximaPagina()" [disabled]="paginaAtual >= totalPaginas" class="btn-page">Próx ➡️</button>
+          </div>
+        </div>
+
+      </div> <!-- Fim Split Layout -->
+    </div>
+  </div>
+
+</div>

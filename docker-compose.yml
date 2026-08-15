@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: ./frontend
+    container_name: app-frontend
+    ports:
+      - "8080:80" # Acesse o front em localhost:8080
+    restart: always
+
+  backend-server:
+    build: ./backend
+    container_name: app-backend-server
+    ports:
+      - "3000:3000" # Porta da API
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+    # Sobrescreve o comando do Dockerfile para rodar SÓ o server
+    command: npm run start:server
+    restart: always
+
+  backend-worker:
+    build: ./backend
+    container_name: app-backend-worker
+    # Não expõe porta, pois o worker trabalha em background (ex: lendo filas ou DB)
+    environment:
+      - NODE_ENV=production
+    # Sobrescreve o comando do Dockerfile para rodar SÓ o worker
+    command: npm run start:worker
+    restart: always

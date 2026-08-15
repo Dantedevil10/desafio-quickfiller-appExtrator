@@ -1,0 +1,334 @@
+// Variáveis Base
+$bg-main: #f0f2f5
+$bg-panel: white
+$bg-right-panel: #e9ecef
+$text-dark: #333
+$text-gray: #666
+$border-color: #ccc
+$border-light: #ddd
+$primary-color: #0056b3
+$success-color: #28a745
+
+.app-container
+  display: flex
+  flex-direction: row
+  height: 100vh
+  font-family: sans-serif
+  background-color: $bg-main
+  overflow: hidden
+
+// ==========================================
+// TELA PRINCIPAL (RESTAURADA)
+// ==========================================
+.left-panel
+  flex: 0 0 45%
+  padding: 25px 30px
+  background-color: $bg-panel
+  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1)
+  overflow-y: auto
+  height: 100vh
+  box-sizing: border-box
+
+  .title
+    margin-top: 0
+    color: $text-dark
+
+  .subtitle
+    color: $text-gray
+    font-size: 14px
+    margin-bottom: 20px
+
+  .form-group label
+    font-weight: bold
+    display: block
+    margin-bottom: 5px
+  
+  .form-control
+    width: 100%
+    padding: 10px
+    border: 1px solid $border-color
+    border-radius: 5px
+    margin-bottom: 20px
+
+  .file-upload-area
+    margin-bottom: 20px
+    padding: 15px
+    border: 2px dashed $border-color
+    border-radius: 5px
+    text-align: center
+    background: #fafafa
+
+.right-panel
+  flex: 1
+  padding: 20px
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  background: $bg-right-panel
+  height: 100vh
+  box-sizing: border-box
+  overflow: hidden
+
+  .empty-pdf
+    flex: 1
+    width: 100%
+    display: flex
+    align-items: center
+    justify-content: center
+    border: 2px dashed $border-color
+    border-radius: 8px
+    background: white
+
+// ==========================================
+// JANELA MODAL OVERLAY (TELA INTEIRA)
+// ==========================================
+.modal-overlay
+  position: fixed
+  top: 0
+  left: 0
+  width: 100vw
+  height: 100vh
+  background: rgba(0, 0, 0, 0.7)
+  backdrop-filter: blur(4px)
+  display: flex
+  align-items: center
+  justify-content: center
+  z-index: 9999
+
+.modal-window
+  background: $bg-panel
+  width: 100vw
+  max-width: 1600px
+  height: 99vh
+  border-radius: 12px
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4)
+  position: relative
+  display: flex
+  flex-direction: column
+  overflow: hidden
+
+.btn-close-modal
+  position: absolute
+  top: 15px
+  right: 20px
+  background: none
+  border: none
+  font-size: 30px
+  color: #777
+  cursor: pointer
+  z-index: 10
+  &:hover
+    color: #000
+
+.modal-split-layout
+  display: flex
+  flex: 1
+  height: 100%
+  overflow: hidden
+
+// --- LADO ESQUERDO DO MODAL (TABELAS) ---
+.modal-left-panel
+  flex: 0 0 50%
+  display: flex
+  flex-direction: column
+  padding: 30px
+  background: white
+  border-right: 1px solid $border-light
+  height: 100%
+  box-sizing: border-box
+
+.revisao-container
+  display: flex
+  flex-direction: column
+  height: 100%
+  overflow: hidden
+
+.vertical-tables-scroll
+  flex: 1 
+  overflow-y: auto 
+  padding-right: 10px
+  margin-top: 15px
+  
+  &::-webkit-scrollbar
+    width: 6px
+  &::-webkit-scrollbar-thumb
+    background: #ccc
+    border-radius: 3px
+
+.page-card
+  border: 1px solid $border-light
+  border-radius: 8px
+  margin-bottom: 20px
+  overflow: hidden
+  
+  .page-header
+    margin: 0
+    background: #f8f9fa
+    padding: 10px 15px
+    border-bottom: 1px solid $border-light
+    color: $text-dark
+  
+  .page-body
+    padding: 15px
+
+// Tabelas e inputs
+.data-table
+  width: 100%
+  border-collapse: collapse
+  margin-bottom: 15px
+  font-size: 13px
+
+  th, td
+    padding: 8px
+    border: 1px solid $border-light
+
+  input[type="text"]
+    padding: 4px
+    border: 1px solid $border-color
+    border-radius: 3px
+    width: 100%
+    box-sizing: border-box
+    transition: 0.2s
+    &:focus
+      border-color: $primary-color
+      outline: none
+      box-shadow: 0 0 5px rgba(0,86,179,0.3)
+
+// --- LADO DIREITO DO MODAL (PDF) ---
+.modal-right-panel
+  flex: 0 0 50%
+  background: $bg-right-panel
+  display: flex
+  flex-direction: column
+  align-items: center
+  justify-content: center
+  padding: 20px
+  box-sizing: border-box
+
+// --- ELEMENTOS COMUNS (BOTOES, PDF, LOADING) ---
+.canvas-container
+  flex: 1
+  display: flex
+  justify-content: center
+  align-items: center
+  width: 100%
+  overflow: auto 
+
+  canvas
+    box-shadow: 0 4px 10px rgba(0,0,0,0.15)
+    background: white
+    border-radius: 4px
+    max-height: 82vh 
+
+.pagination-controls
+  margin-top: 15px
+  display: flex
+  gap: 15px
+  background: white
+  padding: 8px 20px
+  border-radius: 30px
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1)
+
+  .btn-page
+    border: 1px solid $border-color
+    background: white
+    border-radius: 20px
+    padding: 5px 15px
+    cursor: pointer
+    font-weight: bold
+    &:disabled
+      opacity: 0.5
+      cursor: not-allowed
+
+.btn-primary, .btn-success, .btn-custom-upload
+  width: 100%
+  padding: 12px
+  border: none
+  border-radius: 5px
+  font-weight: bold
+  font-size: 16px
+  cursor: pointer
+  transition: 0.2s
+
+.btn-primary
+  background: $primary-color
+  color: white
+  &:hover
+    background: darken($primary-color, 10%)
+
+.btn-success
+  background: $success-color
+  color: white
+
+.btn-custom-upload
+  background: #f8f9fa
+  border: 1px solid $border-color
+  color: $text-dark
+  &:hover
+    background: #e2e6ea
+
+.export-section
+  margin-top: 20px
+  padding-top: 15px
+  border-top: 1px solid $border-light
+  display: flex
+  gap: 15px
+  
+  .export-controls select
+    padding: 10px
+    border-radius: 5px
+    border: 1px solid $border-color
+    height: 100%
+
+.text-center
+  text-align: center
+.text-right
+  text-align: right
+.font-bold
+  font-weight: bold
+
+// Spinner e Progress Bar
+.spinner
+  width: 50px
+  height: 50px
+  border: 5px solid rgba(0, 86, 179, 0.2)
+  border-left-color: $primary-color
+  border-radius: 50%
+  animation: spin 1s linear infinite
+  margin: 0 auto 20px auto
+
+@keyframes spin
+  0% 
+    transform: rotate(0deg)
+
+  100%
+    transform: rotate(360deg) 
+
+.progress-bar-container
+  width: 100%
+  background: #e9ecef
+  height: 10px
+  border-radius: 5px
+  overflow: hidden
+  margin-top: 15px
+
+.progress-bar-fill
+  height: 100%
+  background: $primary-color
+  transition: width 0.3s ease
+
+.processing-container
+  text-align: center
+  padding: 50px
+
+
+
+
+// Centraliza os elementos da tela de erro no meio do painel esquerdo
+.error-container
+  display: flex
+  align-items: center
+  justify-content: center
+  height: 100%
+  padding: 30px
