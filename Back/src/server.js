@@ -10,7 +10,7 @@ const app = express();
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-const PORT = process.env.PORT
+const PORT = process.env.PORT || 3000;
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
@@ -252,6 +252,6 @@ app.get('/api/transcricoes/:id/planilha', async (req, res) => {
     }
 });
 
-app.listen(PORT, () => console.log('🚀 API RESTful rodando na porta'+PORT)); //<- roda na nuvem
+app.listen(PORT, () => console.log(`🚀 API RESTful rodando na porta ${PORT}`));
 
 //app.listen(3000, () => console.log('🚀 API RESTful rodando na porta 3000')); <- roda Localmente

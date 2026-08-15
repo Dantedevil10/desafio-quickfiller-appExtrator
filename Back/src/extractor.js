@@ -91,10 +91,14 @@ export async function extrairTextoPDF(filePath, job) {
 
             const { data: { text } } = await tesseract.recognize(imageBuffer, 'por');
             const linhasOCR = text.split('\n').filter(linha => linha.trim() !== '');
+
+            ///////////// DEBUG ///////////////////////
             
-            console.log(`\n================== [INÍCIO OCR PÁGINA ${pageCounter}] ==================`);
-            console.log(text);
-            console.log(`================== [FIM OCR PÁGINA ${pageCounter}] ==================\n`);
+            //console.log(`\n================== [INÍCIO OCR PÁGINA ${pageCounter}] ==================`);
+            //console.log(text);
+            //console.log(`================== [FIM OCR PÁGINA ${pageCounter}] ==================\n`);
+
+            ////////////////////////////////////
 
             paginasOCR.push({ page: pageCounter++, linhas: linhasOCR });
         }
@@ -106,7 +110,7 @@ export async function extrairTextoPDF(filePath, job) {
 
         console.log(`📊 [Qualidade OCR] Horários: ${horáriosEncontrados} | Palavras-chave: ${qtdPalavrasEncontradas}`);
 
-        if (qtdPalavrasEncontradas < 2 && horáriosEncontrados < 5) {
+        if (qtdPalavrasEncontradas < 2 && horáriosEncontrados < 7) {
             const erroIlegivel = new Error("O arquivo não pôde ser lido com clareza. A imagem está ilegível ou muito bagunçada.");
             erroIlegivel.code = "OCR_ILEGIVEL";
             throw erroIlegivel;
