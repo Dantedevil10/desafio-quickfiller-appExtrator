@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
   providedIn: 'root',
 })
 export class DocumentoService {
-  private apiUrl = 'https://backnode-htfx.onrender.com';
+  private apiUrl = 'https://backnode-htfx.onrender.com/api';
 
   constructor(private http: HttpClient) {}
 
